@@ -11,6 +11,7 @@ class stack
 {
 public:
 	stack();
+	stack(const stack<T> &); // Добавленный конструктор копирования
 	~stack();
 	size_t count() const;
 	void push(T const &);
@@ -24,6 +25,17 @@ private:
 template <typename T>
 stack<T>::stack() :
 	count_(0) {
+}
+// Добавленный конструктор копирования
+template <typename T>
+stack<T>::stack(const stack<T> & otherStack) :
+	array_size_(otherStack.array_size_) 
+{
+	array_ = new T[array_size_]; 
+	count_ = otherStack.count_();
+
+	for (int ix = 0; ix < top; ix++)
+		array_[ix] = otherStack.array_[ix];
 }
 template <typename T>
 stack<T>::~stack()
