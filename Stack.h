@@ -17,6 +17,7 @@ public:
 	void push(T const &);
 	T pop();
 	void print(int);
+	stack<T> operator=(stack const & newst);
 private:
 	T * array_;
 	size_t array_size_;
@@ -41,6 +42,14 @@ template <typename T>
 stack<T>::~stack()
 {
 	delete[] array_;
+}
+template <typename T>
+stack<T> stack<T>::operator=(stack const & newst)  {
+	assert(this != &newst);
+		newst.array_=array_;
+		newst.array_size = array_size_;
+		newst.count_ = count_;
+	return *this;
 }
 template <typename T>
 void stack<T>::push(const T &value)
