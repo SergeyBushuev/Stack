@@ -21,10 +21,7 @@ private:
 };
 template <typename T>
 stack<T>::stack() :
-	array_size_(0) 
-{
-	array_ = new T[array_size_]; 
-	count_ = 0; 
+	count_(0){
 }
 template <typename T>
 stack<T>::~stack()
