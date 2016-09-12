@@ -47,9 +47,12 @@ stack<T>::~stack()
 template <typename T>
 stack<T> stack<T>::operator=(stack const & newst)  {
 	assert(this != &newst);
-		array_ = newst.array_;
-		array_size_ = newst.array_size;
-		count_ = newst.count_;
+	array_size_=newst.array_size_;
+	array_ = new T[array_size_]; 
+	count_ = newst.count_;
+
+	for (int ix = 0; ix < top; ix++)
+		array_[ix] = newst.array_[ix];
 	return *this;
 }
 template <typename T>
