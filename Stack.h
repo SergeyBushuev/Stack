@@ -25,7 +25,8 @@ private:
 };
 template <typename T>
 stack<T>::stack() :
-	count_(0) {
+	count_(0)
+	array_size_(0){
 }
 // Добавленный конструктор копирования
 template <typename T>
@@ -54,15 +55,8 @@ stack<T> stack<T>::operator=(stack const & newst)  {
 template <typename T>
 void stack<T>::push(const T &value)
 {
-	if (count_ == 0) {
-		array_ = new T[count_+1];
-		array_[count_] = value;
-		++count_;
-		array_size_ = count_;
-
-	}
-	else if (count_ == array_size_) {
-		array_size_++;
+	if (count_ >= array_size_) {
+		array_size_=array_size_*2+(array_size_ == 0 ? 1 : 0);
 		T * nstack = new T[array_size_];
 		for (size_t i = 0; i < array_size_; ++i) {
 			nstack[i] = array_[i];
