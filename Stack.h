@@ -1,7 +1,6 @@
 #pragma once
 #ifndef Stack_H
 #define Stack_H
-
 #include <cassert> 
 #include <iostream>
 
@@ -18,7 +17,10 @@ public:
 	T pop();
 	void print(int);
 	stack<T> operator=(stack const & newst);
+
 private:
+
+	T* copy(T const *array_, size_t count_,size_t array_size_);
 	T * array_;
 	size_t array_size_;
 	size_t count_;
@@ -26,44 +28,45 @@ private:
 template <typename T>
 stack<T>::stack() :
 	count_(0)
-	array_size_(0){
+	{
 }
 // Добавленный конструктор копирования
 template <typename T>
 stack<T>::stack(const stack<T> & otherStack) :
-	array_size_(otherStack.array_size_) 
-{
-	array_ = new T[array_size_]; 
-	count_ = otherStack.count_();
-
-	for (int ix = 0; ix < top; ix++)
-		array_[ix] = otherStack.array_[ix];
+	count_(otherStack.count_)
+	array_size_(otherStack.array_size_)
+	array_(copy(otherStack.array_, otherStack.count_, otherStack.array_size_))
+	{
 }
 template <typename T>
 stack<T>::~stack()
 {
 	delete[] array_;
 }
-template <typename T>
-stack<T> stack<T>::operator=(stack const & newst)  {
-	assert(this != &newst);
-	array_size_=newst.array_size_;
-	array_ = new T[array_size_]; 
-	count_ = newst.count_;
 
-	for (int ix = 0; ix < top; ix++)
-		array_[ix] = newst.array_[ix];
+template <typename T>
+stack<T> stack<T>::operator=(stack const & newst) {
+	assert(this != &newst);
+	array_size_ = newst.array_size_;
+	count_ = newst.count_;
+	array_ = copy(newst.array_, newst.count_, newst.array_size_)
 	return *this;
 }
+
+template <typename T>                  //COPY
+T* stack<T>::copy(T const *ptr, size_t count_, size_t array_size_)
+{
+	T* nstack = new T[array_size_];
+	std::copy(ptr,ptr+count_, nstack);
+	return nstack;
+}
+
 template <typename T>
 void stack<T>::push(const T &value)
 {
 	if (count_ >= array_size_) {
-		array_size_=array_size_*2+(array_size_ == 0 ? 1 : 0);
-		T * nstack = new T[array_size_];
-		for (size_t i = 0; i < array_size_; ++i) {
-			nstack[i] = array_[i];
-		}
+		array_size_ = array_size_ * 2 + (array_size_ == 0 ? 1 : 0);
+		T * nstack = copy(array_, count_, array_size_);
 		delete[] array_;
 		array_ = nstack;
 		array_[count_] = value;
@@ -91,6 +94,6 @@ size_t stack<T>::count() const
 template <typename T>
 void stack<T>::print(int c)
 {
-		cout << array_[c] << endl;
+	cout << array_[c] << endl;
 }
 #endif // Stack_H
