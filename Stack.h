@@ -13,7 +13,7 @@ public:
 	stack(const stack<T> &); // Добавленный конструктор копирования
 	~stack();
 	size_t count() const;
-	void push(T const &);
+	void push(T const &); 
 	T pop();
 	void print(int);
 	stack<T> operator=(stack const & newst);
