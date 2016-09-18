@@ -1,6 +1,6 @@
 
-#ifndef Stack_H
-#define Stack_H
+#ifndef Stack_cpp
+#define Stack_cpp
 #pragma once
 #include <cassert> 
 #include <iostream>
@@ -97,4 +97,4 @@ void stack<T>::print(int c)
 {
 	cout << array_[c] << endl;
 }
-#endif // Stack_H
+#endif // Stack_cpp
