@@ -1,7 +1,6 @@
 
 #ifndef Stack_cpp
 #define Stack_cpp
-#pragma once
 #include <cassert> 
 #include <iostream>
 
