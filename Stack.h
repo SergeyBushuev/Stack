@@ -10,7 +10,7 @@ class stack
 {
 public:
 	stack();
-	stack(const stack<T> &); // Добавленный конструктор копирования
+	stack(const stack &); // Добавленный конструктор копирования
 	~stack();
 	size_t count() const;
 	void push(T const &); 
@@ -32,7 +32,7 @@ stack<T>::stack() :
 }
 // Добавленный конструктор копирования
 template <typename T>
-stack<T>::stack(const stack<T> & otherStack) :
+stack<T>::stack(const stack & otherStack) :
 	count_(otherStack.count_)
 	array_size_(otherStack.array_size_)
 	array_(copy(otherStack.array_, otherStack.count_, otherStack.array_size_))
