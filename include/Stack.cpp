@@ -6,7 +6,7 @@
 #include <iostream>
 
 #pragma once
-using namespace std
+using namespace std;
 template <typename T>
 class stack
 {
