@@ -1,6 +1,7 @@
-#pragma once
+
 #ifndef Stack_H
 #define Stack_H
+#pragma once
 #include <cassert> 
 #include <iostream>
 
