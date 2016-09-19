@@ -26,8 +26,9 @@ T * array_;
 };
 template <typename T>
 stack<T>::stack() :
-	count_(0)
-	{
+	count_(0),
+	array_size_(0)
+{
 }
 // Добавленный конструктор копирования
 template <typename T>
