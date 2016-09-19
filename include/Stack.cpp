@@ -71,12 +71,9 @@ void stack<T>::push(const T &value)
 		T * nstack = copy(array_, count_, array_size_);
 		delete[] array_;
 		array_ = nstack;
+                }
 		array_[count_] = value;
 		++count_;
-	}
-	else if (count_ < array_size_) {
-		array_[count_] = value;
-		count_++;
 	}
 
 }
