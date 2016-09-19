@@ -25,9 +25,6 @@ T * array_;
 	size_t count_;
 };
 template <typename T>
-	T* copy(T const *array_, size_t count_,size_t array_size_);
-	
-template <typename T>
 stack<T>::stack() :
 	count_(0)
 	{
@@ -57,7 +54,7 @@ stack<T>& stack<T>::operator=(stack & newst) {
 }
 
 template <typename T>                  //COPY
-T* stack<T>::copy(T const *ptr, size_t count_, size_t array_size_)
+T* copy(T const *ptr, size_t count_, size_t array_size_)
 {
 	T* nstack = new T[array_size_];
 	std::copy(ptr,ptr+count_, nstack);
