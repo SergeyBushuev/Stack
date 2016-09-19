@@ -17,7 +17,7 @@ public:
 	void push(T const &); 
 	T pop();
 	void print(int);
-	stack operator=(stack const & newst);
+	stack operator=(stack & newst);
 
 private:
 
@@ -46,7 +46,7 @@ stack<T>::~stack()
 }
 
 template <typename T>
-stack<T> stack<T>::operator=(stack const & newst) {
+stack<T> stack<T>::operator=(stack & newst) {
 	if(this != &newst){
 	std::swap(array_size_,newst.array_size_);
 	std::swap(count_ , newst.count_);
