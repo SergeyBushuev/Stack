@@ -17,15 +17,16 @@ public:
 	void push(T const &); 
 	T pop();
 	void print(int);
-	stack operator=(stack & newst);
+	stack & operator=(stack & newst);
 
 private:
-
-	T* copy(T const *array_, size_t count_,size_t array_size_);
-	T * array_;
+T * array_;
 	size_t array_size_;
 	size_t count_;
 };
+template <typename T>
+	T* copy(T const *array_, size_t count_,size_t array_size_);
+	
 template <typename T>
 stack<T>::stack() :
 	count_(0)
@@ -46,7 +47,7 @@ stack<T>::~stack()
 }
 
 template <typename T>
-stack<T> stack<T>::operator=(stack & newst) {
+stack<T>& stack<T>::operator=(stack & newst) {
 	if(this != &newst){
 	std::swap(array_size_,newst.array_size_);
 	std::swap(count_ , newst.count_);
