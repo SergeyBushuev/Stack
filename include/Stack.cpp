@@ -80,12 +80,13 @@ void stack<T>::push(const T &value)
 
 }
 template <typename T>
-T stack<T>::pop()
+T stack<T>::pop() 
 {
-	assert(count_ > 0);
-
+	
+if (count_ == 0) {
+		throw std::logic_error("Stack is empty!");
+	}
 	return array_[--count_];
-
 }
 template <typename T>
 size_t stack<T>::count() const
