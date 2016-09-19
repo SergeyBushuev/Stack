@@ -24,7 +24,7 @@ SCENARIO("pop", "[pop]"){
 }
 SCENARIO("copy", "[copy]"){
   stack<int> stack, stack2;
-  stack.push(1);
+  stack1.push(1);
   stack2=stack;
   REQUIRE(stack2.count()==1);
   REQUIRE(stack2.pop()==1);
