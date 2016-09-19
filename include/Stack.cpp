@@ -34,7 +34,7 @@ stack<T>::stack() :
 // Добавленный конструктор копирования
 template <typename T>
 stack<T>::stack(const stack & otherStack) :
-	count_(otherStack.count_),
+	count_(otherStack.count_), 
 	array_size_(otherStack.array_size_),
 	array_(copy(otherStack.array_, otherStack.count_, otherStack.array_size_))
 	{
@@ -46,7 +46,7 @@ stack<T>::~stack()
 }
 
 template <typename T>
-stack<T> stack::operator=(stack const & newst) {
+stack stack<T>::operator=(stack const & newst) {
 	if(this != &newst){
 	std::swap(array_size_,newst.array_size_);
 	std::swap(count_ , newst.count_);
