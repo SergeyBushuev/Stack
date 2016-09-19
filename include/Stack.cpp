@@ -74,7 +74,7 @@ void stack<T>::push(const T &value)
                 }
 		array_[count_] = value;
 		++count_;
-	}
+	
 
 }
 template <typename T>
