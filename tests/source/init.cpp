@@ -29,3 +29,10 @@ SCENARIO("copy", "[copy]"){
   REQUIRE(stack2.count()==1);
   REQUIRE(stack2.pop()==1);
 }
+SCENARIO("copy2", "[copy2]"){
+  stack<int> stack1;
+  stack.push(1);
+  stack<int> stack2= stack1;
+  REQUIRE(stack2.count()==1);
+  REQUIRE(stack2.pop()==1);
+}
