@@ -24,6 +24,13 @@ T * array_;
 	size_t array_size_;
 	size_t count_;
 };
+template <typename T>                  //COPY
+T* copy(T const *ptr, size_t count_, size_t array_size_)
+{
+	T* nstack = new T[array_size_];
+	std::copy(ptr,ptr+count_, nstack);
+	return nstack;
+}
 template <typename T>
 stack<T>::stack() :
 	count_(0),
@@ -52,14 +59,6 @@ stack<T> stack<T>::operator=(stack & newst) {
         std::swap(array_,newst.array_);
 }
 	return *this;
-}
-
-template <typename T>                  //COPY
-T* copy(T const *ptr, size_t count_, size_t array_size_)
-{
-	T* nstack = new T[array_size_];
-	std::copy(ptr,ptr+count_, nstack);
-	return nstack;
 }
 
 template <typename T>
