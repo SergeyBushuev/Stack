@@ -25,7 +25,7 @@ T * array_;
 	size_t count_;
 };
 template <typename T>                  //COPY
-T* copy(T const *ptr, size_t count_, size_t array_size_)
+T* newcopy(T const *ptr, size_t count_, size_t array_size_)
 {
 	T* nstack = new T[array_size_];
 	std::copy(ptr,ptr+count_, nstack);
@@ -42,7 +42,7 @@ template <typename T>
 stack<T>::stack(const stack & otherStack) :
 	count_(otherStack.count_), 
 	array_size_(otherStack.array_size_),
-	array_(copy(otherStack.array_, otherStack.count_, otherStack.array_size_))
+	array_(newcopy(otherStack.array_, otherStack.count_, otherStack.array_size_))
 	{
 }
 template <typename T>
@@ -56,7 +56,7 @@ stack<T>& stack<T>::operator=(stack & newst) {
 	if(this != &newst){
 	array_size_ = newst.array_size_;
 	count_ = newst.count_;
-        array_ = copy(newst.array_, newst.count_, newst.array_size_);
+        array_ = newcopy(newst.array_, newst.count_, newst.array_size_);
 }
 	return *this;
 }
@@ -66,7 +66,7 @@ void stack<T>::push(const T &value)
 {
 	if (count_ >= array_size_) {
 		array_size_ = array_size_ * 2 + (array_size_ == 0 ? 1 : 0);
-		T * nstack = copy(array_, count_, array_size_);
+		T * nstack = newcopy(array_, count_, array_size_);
 		delete[] array_;
 		array_ = nstack;
                 }
