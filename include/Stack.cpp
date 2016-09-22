@@ -10,25 +10,30 @@ template <typename T>
 class stack
 {
 public:
-	stack();
-	stack(const stack &); // Добавленный конструктор копирования
-	~stack();
-	size_t count() const;
-	void push(T const &); 
-	T pop();
-	void print(int);
-	stack & operator=(stack & newst);
+	stack();  					/*noexcept*/
+	stack(const stack &); 				/*strong*/
+	~stack();					/*noexcept*/
+	size_t count() const;				/*noexcept*/
+	void push(T const &); 				/*strong*/
+	T pop();					/*strong*/
+	stack & operator=(stack & newst);		/*strong*/
 
 private:
 T * array_;
 	size_t array_size_;
 	size_t count_;
 };
-template <typename T>                  //COPY
-T* newcopy(T const *ptr, size_t count_, size_t array_size_)
+template <typename T>                  
+T* newcopy(T const *ptr, size_t count, size_t array_size)  /*strong*/
 {
-	T* nstack = new T[array_size_];
-	std::copy(ptr,ptr+count_, nstack);
+	T* nstack = new T[array_size];
+	try {
+		std::copy(ptr,ptr+count, nstack);
+	}
+	catch(...){
+		delete[] nstack;
+		throw;
+	}
 	return nstack;
 }
 template <typename T>
@@ -65,10 +70,10 @@ template <typename T>
 void stack<T>::push(const T &value)
 {
 	if (count_ >= array_size_) {
-		array_size_ = array_size_ * 2 + (array_size_ == 0 ? 1 : 0);
-		T * nstack = newcopy(array_, count_, array_size_);
-		delete[] array_;
-		array_ = nstack;
+			array_size_ = array_size_ * 2 + (array_size_ == 0 ? 1 : 0);
+			T * nstack = newcopy(array_, count_, array_size_);
+			delete[] array_;
+			array_ = nstack;
                 }
 		array_[count_] = value;
 		++count_;
@@ -79,7 +84,7 @@ template <typename T>
 T stack<T>::pop() 
 {
 	
-if (count_ == 0) {
+	if (count_ == 0) {
 		throw std::logic_error("Stack is empty!");
 	}
 	return array_[--count_];
@@ -88,10 +93,5 @@ template <typename T>
 size_t stack<T>::count() const
 {
 	return count_;
-}
-template <typename T>
-void stack<T>::print(int c)
-{
-	cout << array_[c] << endl;
 }
 #endif // Stack_cpp
