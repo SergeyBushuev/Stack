@@ -17,7 +17,7 @@ public:
 	void push(T const &); 				/*strong*/
 	T pop();					/*strong*/
 	stack & operator=(stack & newst);		/*strong*/
-
+	bool empty() const;				/*noexcept*/
 private:
 T * array_;
 	size_t array_size_;
@@ -93,5 +93,9 @@ template <typename T>
 size_t stack<T>::count() const
 {
 	return count_;
+}
+template<typename T> /*noexcept*/
+bool stack<T>::empty() const{
+	return (count_ == 0);
 }
 #endif // Stack_cpp
