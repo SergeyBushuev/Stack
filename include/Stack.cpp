@@ -23,11 +23,16 @@ T * array_;
 	size_t count_;
 };
 template <typename T>                  //COPY
-T* newcopy(T const *ptr, size_t count_, size_t array_size_)  /*strong*/
+T* newcopy(T const *ptr, size_t count, size_t array_size)  /*strong*/
 {
-	T* nstack = new T[array_size_];
-	std::copy(ptr,ptr+count_, nstack);
-	return nstack;
+	T* nstack = new T[array_size];
+ 	try {
+ 		std::copy(ptr,ptr+count, nstack);
+ 	}
+ 	catch(...){
+ 		delete[] nstack;
+ 		throw;
+ 	}
 }
 template <typename T>
 stack<T>::stack() :
@@ -52,9 +57,9 @@ stack<T>::~stack()
 template <typename T>
 stack<T>& stack<T>::operator=(stack & newst) {
 	if(this != &newst){
-	array_size_ = newst.array_size_;
-	count_ = newst.count_;
-        array_ = newcopy(newst.array_, newst.count_, newst.array_size_);
+		array_size_ = newst.array_size_;
+		count_ = newst.count_;
+        	array_ = newcopy(newst.array_, newst.count_, newst.array_size_);
 }
 	return *this;
 }
@@ -77,7 +82,7 @@ template <typename T>
 T stack<T>::pop() 
 {
 	
-if (count_ == 0) {
+	if (count_ == 0) {
 		throw std::logic_error("Stack is empty!");
 	}
 	return array_[--count_];
