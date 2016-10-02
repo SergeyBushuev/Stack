@@ -33,6 +33,7 @@ T* newcopy(T const *ptr, size_t count, size_t array_size)  /*strong*/
  		delete[] nstack;
  		throw;
  	}
+	return nstack;
 }
 template <typename T>
 stack<T>::stack() :
