@@ -74,8 +74,8 @@ void stack<T>::push(const T &value)
 		delete[] array_;
 		array_ = nstack;
                 }
-		array_[count_] = value;
-		++count_;
+	array_[count_] = value;
+	++count_;
 	
 
 }
