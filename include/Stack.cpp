@@ -9,16 +9,15 @@ template <typename T>
 class stack
 {
 public:
-	stack(); /*noexcept*/ 
-	stack(const stack &); /*strong*/
-	~stack(); /*noexcept*/
-	size_t count() const; /*noexcept*/
-	void push(T const &); /*strong*/
-	T pop();/*strong*/
-	stack & operator=(stack & newst);/*strong*/
-	bool empty() const;				/*noexcept*/
+	stack();					/*noexcept*/ 
+	stack(const stack &); 				/*strong*/
+	~stack(); 					/*noexcept*/
+	size_t count() const; 				/*noexcept*/
+	void push(T const &); 				/*strong*/
+	T pop();					/*basic*/
+	stack & operator=(stack & newst);		/*strong*/
 private:
-T * array_;
+	T * array_;
 	size_t array_size_;
 	size_t count_;
 };
@@ -44,9 +43,9 @@ stack<T>::stack() :
 // Добавленный конструктор копирования
 template <typename T>
 stack<T>::stack(const stack & otherStack) :
+	array_(newcopy(otherStack.array_, otherStack.count_, otherStack.array_size_)),
 	count_(otherStack.count_), 
-	array_size_(otherStack.array_size_),
-	array_(newcopy(otherStack.array_, otherStack.count_, otherStack.array_size_))
+	array_size_(otherStack.array_size_)	
 	{
 }
 template <typename T>
@@ -58,10 +57,10 @@ stack<T>::~stack()
 template <typename T>
 stack<T>& stack<T>::operator=(stack & newst) {
 	if(this != &newst){
+		array_ = newcopy(newst.array_, newst.count_, newst.array_size_);
 		array_size_ = newst.array_size_;
 		count_ = newst.count_;
-        	array_ = newcopy(newst.array_, newst.count_, newst.array_size_);
-}
+        }
 	return *this;
 }
 
@@ -69,10 +68,10 @@ template <typename T>
 void stack<T>::push(const T &value)
 {
 	if (count_ >= array_size_) {
-		array_size_ = array_size_ * 2 + (array_size_ == 0 ? 1 : 0);
 		T * nstack = newcopy(array_, count_, array_size_);
 		delete[] array_;
 		array_ = nstack;
+		array_size_ = array_size_ * 2 + (array_size_ == 0 ? 1 : 0);
                 }
 	array_[count_] = value;
 	++count_;
@@ -93,8 +92,5 @@ size_t stack<T>::count() const
 {
 	return count_;
 }
-template<typename T> /*noexcept*/
- bool stack<T>::empty() const{
- 	return (count_ == 0);
- }
+
 #endif // Stack_cpp
