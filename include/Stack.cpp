@@ -17,6 +17,7 @@ public:
 	void pop(); 					/*strong*/
 	const T& top(); 				/*strong*/
 	stack & operator=(stack & newst);		/*strong*/
+	bool empty(); 					/*noexcept*/
 private:
 	T * array_;
 	size_t array_size_;
@@ -101,5 +102,9 @@ size_t stack<T>::count() const
 {
 	return count_;
 }
-
+template<typename T>
+bool stack<T>::empty()
+{ 
+	return(count_ == 0); 
+} 
 #endif // Stack_cpp
