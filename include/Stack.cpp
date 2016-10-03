@@ -61,7 +61,6 @@ stack<T>& stack<T>::operator=(stack & newst) {
 	if(this != &newst){
 		T *p=array_;
 		array_ = newcopy(newst.array_, newst.count_, newst.array_size_);
-		
 		delete[] p;
 		array_size_ = newst.array_size_;
 		count_ = newst.count_;
