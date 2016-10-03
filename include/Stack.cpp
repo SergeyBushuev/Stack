@@ -14,14 +14,15 @@ public:
 	~stack(); 					/*noexcept*/
 	size_t count() const; 				/*noexcept*/
 	void push(T const &); 				/*strong*/
-	T pop();					/*basic*/
+	void pop(); 					/*strong*/
+	const T& top(); 				/*strong*/
 	stack & operator=(stack & newst);		/*strong*/
 private:
 	T * array_;
 	size_t array_size_;
 	size_t count_;
 };
-template <typename T>                  //COPY
+template <typename T>                  			//COPY
 T* newcopy(T const *ptr, size_t count, size_t array_size)  /*strong*/
 {
 	T* nstack = new T[array_size];
@@ -72,20 +73,28 @@ void stack<T>::push(const T &value)
 		delete[] array_;
 		array_ = nstack;
 		array_size_ = array_size_ * 2 + (array_size_ == 0 ? 1 : 0);
-                }
+        }
 	array_[count_] = value;
 	++count_;
 	
 
 }
 template <typename T>
-T stack<T>::pop() 
+const T& stack<T>::top()
 {
-	
-	if (count_ == 0) {
-		throw std::logic_error("Stack is empty!");
+	if (count_ > 0){ 
+		return array_[count_ -1];
 	}
-	return array_[--count_];
+	else throw("Stack is empty");
+}
+
+template <typename T>
+void stack<T>::pop()
+{
+	if (count_> 0){
+		--count_;
+	}
+	else throw ("Stack is empty");
 }
 template <typename T>
 size_t stack<T>::count() const
