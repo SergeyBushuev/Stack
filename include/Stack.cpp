@@ -3,7 +3,7 @@
 #include <iostream>
 
 #pragma once
-template <typename T>
+template<typename T>
 class allocator {
 protected:
 	explicit allocator(size_t size = 0);							/*noexcept*/
@@ -49,7 +49,7 @@ public:
 	stack & operator=(stack & newst);				/*strong*/
 	bool empty(); 									/*noexcept*/
 };		
-template <typename T>                  			//COPY
+template<typename T>                  			//COPY
 T* newcopy(T const *ptr, size_t count, size_t _size)  /*strong*/
 {
 	T* nstack = new T[_size];
@@ -62,25 +62,25 @@ T* newcopy(T const *ptr, size_t count, size_t _size)  /*strong*/
 	}
 	return nstack;
 }
-template <typename T>
+template<typename T>
 stack<T>::stack() :
 	allocator<T>()
 {
 }
-template <typename T>
+template<typename T>
 stack<T>::stack(const stack & otherStack) :
 	allocator<T>(otherStack.count_) {
 	allocator<T>::ptr_ = newcopy(otherStack.ptr_, otherStack.count_, otherStack.size_);
 	allocator<T>::size_ = otherStack.size_;
 {
 }
-template <typename T>
+template<typename T>
 stack<T>::~stack()
 {
 	delete[] allocator<T>::ptr_;
 }
 
-template <typename T>
+template<typename T>
 stack<T>& stack<T>::operator=(stack & newst) {
 	if (this != &newst) {
 		T *p = allocator<T>::ptr_;
@@ -92,7 +92,7 @@ stack<T>& stack<T>::operator=(stack & newst) {
 	return *this;
 }
 
-template <typename T>
+template<typename T>
 void stack<T>::push(const T &value)
 {
 	if (allocator<T>::count_ >= allocator<T>::size_) {
@@ -107,7 +107,7 @@ void stack<T>::push(const T &value)
 
 
 }
-template <typename T>
+template<typename T>
 const T& stack<T>::top()
 {
 	if (allocator<T>::count_ > 0) {
@@ -116,7 +116,7 @@ const T& stack<T>::top()
 	else throw("Stack is empty");
 }
 
-template <typename T>
+template<typename T>
 void stack<T>::pop()
 {
 	if (allocator<T>::count_> 0) {
@@ -124,7 +124,7 @@ void stack<T>::pop()
 	}
 	else throw ("Stack is empty");
 }
-template <typename T>
+template<typename T>
 size_t stack<T>::count() const
 {
 	return allocator<T>::count_;
