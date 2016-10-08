@@ -95,14 +95,14 @@ stack<T>& stack<T>::operator=(stack & newst) {
 template <typename T>
 void stack<T>::push(const T &value)
 {
-	if (count_ >= allocator<T>::size_) {
+	if (allocator<T>::count_ >= allocator<T>::size_) {
 		size_t size = allocator<T>::size_ * 2 + (allocator<T>::size_ == 0 ? 1 : 0);
 		T * nstack = newcopy(allocator<T>::ptr_, allocator<T>::count_, allocator<T>::size_);
 		delete[] allocator<T>::ptr_;
 		allocator<T>::ptr_ = nstack;
 		allocator<T>::size_ = size;
 	}
-	allocator<T>::ptr_[count_] = value;
+	allocator<T>::ptr_[allocator<T>::count_] = value;
 	++allocator<T>::count_;
 
 
