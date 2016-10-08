@@ -8,10 +8,3 @@ SCENARIO("Stack: init", "[init]") {
 	REQUIRE(sizeof(a) != 0);
 } 
 
-
-SCENARIO("push", "[push]"){ 
-  stack<int> stack;
-  stack.push(1);
-  REQUIRE(stack.count()==1);
-  REQUIRE(stack.top()==1);
-}
