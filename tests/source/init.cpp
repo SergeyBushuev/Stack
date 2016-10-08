@@ -8,30 +8,53 @@ SCENARIO("Stack: init", "[init]") {
 	REQUIRE(sizeof(a) != 0);
 } 
 
-SCENARIO("push", "[push]"){ 
-  stack<size_t> stack;
-  stack.push(1);
-  REQUIRE(stack.count()==1);
-  REQUIRE(stack.top()==1);
+SCENARIO("Stack: operator==", "[op==]") {
+	stack<size_t> a, b;
+	a.push(1);
+	b.push(1);
+	REQUIRE(a == b);
 }
 
-SCENARIO("pop", "[pop]"){
-  stack<size_t> stack;
-  stack.push(1);
-  REQUIRE(stack.count()==1);
-  REQUIRE(stack.top()==1);
+SCENARIO("Stack: copy", "[copy]") {
+	stack<size_t> a;
+	a.push(1);
+	stack<size_t> b = a;
+	REQUIRE(a == b);
 }
-SCENARIO("copy", "[copy]"){
-  stack<size_t> stack, stack2;
-  stack.push(1);
-  stack2=stack;
-  REQUIRE(stack2.count()==1);
-  REQUIRE(stack2.top()==1);
+
+SCENARIO("Stack: count", "[count]") {
+	stack<size_t> a;
+	a.push(1);
+	a.push(2);
+	REQUIRE(a.count() == 2);
 }
-SCENARIO("copy2", "[copy2]"){
-  stack<size_t> stack1;
-  stack1.push(1);
-  stack<size_t> stack2= stack1;
-  REQUIRE(stack2.count()==1);
-  REQUIRE(stack2.top()==1);
+
+SCENARIO("Stack: top", "[top]") {
+	stack<size_t> a;
+	a.push(1);
+	a.push(2);
+	REQUIRE(a.top() == 2);
+}
+
+SCENARIO("Stack: pop", "[pop]") {
+	stack<size_t> a;
+	a.push(1);
+	a.push(2);
+	a.pop();
+	REQUIRE(a.count() == 1);
+}
+
+SCENARIO("Stack: push", "[push]") {
+	stack<size_t> a;
+	a.push(1);
+	REQUIRE(a.top() == 1);
+	REQUIRE(a.count() == 1);
+}
+
+SCENARIO("Stack: operator=", "[op=]") {
+	stack<size_t> a;
+	a.push(1);
+	stack<size_t> b;
+	b = a;
+	REQUIRE(b == a);
 }
