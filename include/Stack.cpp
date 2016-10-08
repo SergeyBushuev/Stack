@@ -1,5 +1,4 @@
 #ifndef Stack_cpp
-#include "stdafx.h"
 #include <cassert> 
 #include <iostream>
 
