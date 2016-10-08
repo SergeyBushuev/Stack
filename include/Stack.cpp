@@ -69,9 +69,9 @@ stack<T>::stack() :
 }
 template <typename T>
 stack<T>::stack(const stack & otherStack) :
-	allocator<T>::ptr_(newcopy(otherStack.ptr_, otherStack.count_, otherStack.size_)),
-	allocator<T>::count_(otherStack.count_),
-	allocator<T>::size_(otherStack.size_)
+	allocator<T>(otherStack.count_) {
+	allocator<T>::ptr_ = newcopy(otherStack.ptr_, otherStack.count_, otherStack.size_);
+	allocator<T>::size_ = otherStack.size_;
 {
 }
 template <typename T>
