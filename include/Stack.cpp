@@ -9,7 +9,7 @@ protected:
 	explicit allocator(size_t size = 0);							/*noexcept*/
 	~allocator();													/*noexcept*/
 	auto swap(allocator & other) -> void;							/*noexcept*/
-
+  
 	allocator(allocator const &) = delete;
 	auto operator=(allocator const &)->allocator & = delete;
 
