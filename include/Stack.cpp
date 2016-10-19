@@ -19,14 +19,12 @@ protected:
 };
 template<typename T> 
 allocator<T>::allocator(size_t size) :
-	ptr_(static_cast<T *>(size == 0 ? nullptr : operator new(size * sizeof(T)))),
-	size_(0),
-	count_(size) {
+	ptr_(static_cast<T *>(size == 0 ? nullptr : operator new(size * sizeof(T)))){
 }
 
 template<typename T> 
 allocator<T>::~allocator() {
-	delete ptr_;
+	operator delete ptr_;
 }
 
 template<typename T> 
@@ -36,7 +34,7 @@ auto allocator<T>::swap(allocator & other) -> void {
 	std::swap(size_, other.size_);
 }
 template <typename T>
-class stack : protected allocator<T>
+class stack : private allocator<T>
 {
 public:
 	stack();										/*noexcept*/
