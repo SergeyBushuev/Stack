@@ -1,4 +1,4 @@
-#ifndef Stack_cpp
+#ifndef stack_hpp
 #include <cassert> 
 #include <iostream>
 
@@ -131,4 +131,4 @@ bool stack<T>::empty()
 {
 	return(allocator<T>::count_ == 0);
 }
-#endif // Stack_cpp
+#endif // stack_hpp
