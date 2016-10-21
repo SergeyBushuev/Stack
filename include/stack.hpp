@@ -125,7 +125,7 @@ void stack<T>::push(const T &value)
 		allocator<T>::ptr_ = nstack;
 		allocator<T>::size_ = size;
 	}
-	construct(allocator<T>::ptr_ + allocator<T>::count_, el);
+	construct(allocator<T>::ptr_ + allocator<T>::count_, value);
 	++allocator<T>::count_;
 
 
