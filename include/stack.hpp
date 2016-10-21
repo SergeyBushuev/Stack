@@ -1,8 +1,6 @@
-#ifndef stack_hpp
-#include <cassert> 
 #include <iostream>
-
 #pragma once
+
 template<typename T>
 class allocator {
 protected:
@@ -17,6 +15,9 @@ protected:
 	size_t size_;
 	size_t count_;
 };
+
+//-------------------------------------------------------------------------------------------------------------------------------
+
 template<typename T> 
 allocator<T>::allocator(size_t size) :
 	ptr_(static_cast<T *>(size == 0 ? nullptr : operator new(size * sizeof(T)))){
@@ -24,7 +25,7 @@ allocator<T>::allocator(size_t size) :
 
 template<typename T> 
 allocator<T>::~allocator() {
-	operator delete ptr_;
+	operator delete(ptr_);
 }
 
 template<typename T> 
@@ -33,11 +34,14 @@ auto allocator<T>::swap(allocator & other) -> void {
 	std::swap(count_, other.count_);
 	std::swap(size_, other.size_);
 }
+
+//-------------------------------------------------------------------------------------------------------------------------------
+
 template <typename T>
 class stack : private allocator<T>
 {
 public:
-	stack();										/*noexcept*/
+	stack(size_t size = 0);										/*noexcept*/
 	stack(const stack &); 							/*strong*/
 	~stack(); 										/*noexcept*/
 	size_t count() const; 							/*noexcept*/
@@ -45,8 +49,11 @@ public:
 	void pop(); 									/*strong*/
 	const T& top(); 								/*strong*/
 	stack & operator=(stack & newst);				/*strong*/
-	bool empty(); 									/*noexcept*/
-};		
+	bool empty() const; 									/*noexcept*/
+};
+
+//-------------------------------------------------------------------------------------------------------------------------------
+
 template<typename T>                  			//COPY
 T* newcopy(T const *ptr, size_t count, size_t _size)  /*strong*/
 {
@@ -60,31 +67,47 @@ T* newcopy(T const *ptr, size_t count, size_t _size)  /*strong*/
 	}
 	return nstack;
 }
-template<typename T>
-stack<T>::stack() :
-	allocator<T>()
+
+template <typename T1, typename T2>
+void construct(T1 * ptr, T2 const & value) {
+    new(ptr) T1 (value);
+}
+
+template <typename T>
+void destroy(T * ptr) noexcept
 {
+    ptr->~T();
 }
+
+template <typename FwdIter>
+void destroy(FwdIter first, FwdIter last) noexcept
+{
+    for (; first != last; ++first) {
+        destroy(&*first);
+    }
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------
+
 template<typename T>
-stack<T>::stack(const stack & otherStack) :
-	allocator<T>(otherStack.count_) {
-	allocator<T>::ptr_ = newcopy(otherStack.ptr_, otherStack.count_, otherStack.size_);
-	allocator<T>::size_ = otherStack.size_;
-}
+stack<T>::stack(size_t s) : allocator<T>(s) {}
+
 template<typename T>
 stack<T>::~stack()
 {
-	delete[] allocator<T>::ptr_;
+	destroy(allocator<T>::ptr_, allocator<T>::ptr_ + allocator<T>::count_);
 }
+
+template <typename T>
+stack<T>::stack(const stack& otherStack) : allocator<T>(otherStack.size_) {
+	for (size_t t = 0; t < otherStack.count_; ++t) construct(allocator<T>::ptr_ + t, otherStack.ptr_[t]);
+	allocator<T>::count_ = otherStack.count_;
+};
 
 template<typename T>
 stack<T>& stack<T>::operator=(stack & newst) {
 	if (this != &newst) {
-		T *p = allocator<T>::ptr_;
-		allocator<T>::ptr_ = newcopy(newst.ptr_, newst.count_, newst.size_);
-		delete[] p;
-		allocator<T>::size_ = newst.size_;
-		allocator<T>::count_ = newst.count_;
+		(stack(newst)).swap(*this);
 	}
 	return *this;
 }
@@ -93,17 +116,21 @@ template<typename T>
 void stack<T>::push(const T &value)
 {
 	if (allocator<T>::count_ >= allocator<T>::size_) {
-		size_t size = allocator<T>::size_ * 2 + (allocator<T>::size_ == 0 ? 1 : 0);
-		T * nstack = newcopy(allocator<T>::ptr_, allocator<T>::count_, allocator<T>::size_);
-		delete[] allocator<T>::ptr_;
+		size_t size = allocator<T>::size_ * 2 + (allocator<T>::size_ == 0);
+		T * nstack = static_cast<T *>(operator new (sizeof(T)*allocator<T>::size_));
+		for (size_t t = 0; t < allocator<T>::count_; ++t) {
+			construct(nstack + t, allocator<T>::ptr_[t]);
+		}
+		operator delete(allocator<T>::ptr_);
 		allocator<T>::ptr_ = nstack;
 		allocator<T>::size_ = size;
 	}
-	allocator<T>::ptr_[allocator<T>::count_] = value;
+	construct(allocator<T>::ptr_ + allocator<T>::count_, value);
 	++allocator<T>::count_;
 
 
 }
+
 template<typename T>
 const T& stack<T>::top()
 {
@@ -121,14 +148,15 @@ void stack<T>::pop()
 	}
 	else throw ("Stack is empty");
 }
+
 template<typename T>
 size_t stack<T>::count() const
 {
 	return allocator<T>::count_;
 }
+
 template<typename T>
-bool stack<T>::empty()
+bool stack<T>::empty() const
 {
 	return(allocator<T>::count_ == 0);
 }
-#endif // stack_hpp
