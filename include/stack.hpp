@@ -1,5 +1,3 @@
-#ifndef stack_hpp
-#include <cassert> 
 #include <iostream>
 
 #pragma once
@@ -143,4 +141,3 @@ bool stack<T>::empty()
 {
 	return(allocator<T>::count_ == 0);
 }
-#endif // stack_hpp
