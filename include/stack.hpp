@@ -1,6 +1,6 @@
 #include <iostream>
-
 #pragma once
+
 template<typename T>
 class allocator {
 protected:
@@ -15,6 +15,9 @@ protected:
 	size_t size_;
 	size_t count_;
 };
+
+//-------------------------------------------------------------------------------------------------------------------------------
+
 template<typename T> 
 allocator<T>::allocator(size_t size) :
 	ptr_(static_cast<T *>(size == 0 ? nullptr : operator new(size * sizeof(T)))){
@@ -31,6 +34,9 @@ auto allocator<T>::swap(allocator & other) -> void {
 	std::swap(count_, other.count_);
 	std::swap(size_, other.size_);
 }
+
+//-------------------------------------------------------------------------------------------------------------------------------
+
 template <typename T>
 class stack : private allocator<T>
 {
@@ -46,6 +52,8 @@ public:
 	bool empty() const; 									/*noexcept*/
 };
 
+//-------------------------------------------------------------------------------------------------------------------------------
+
 template<typename T>                  			//COPY
 T* newcopy(T const *ptr, size_t count, size_t _size)  /*strong*/
 {
@@ -59,9 +67,6 @@ T* newcopy(T const *ptr, size_t count, size_t _size)  /*strong*/
 	}
 	return nstack;
 }
-
-template<typename T>
-stack<T>::stack(size_t s) : allocator<T>(s) {}
 
 template <typename T1, typename T2>
 void construct(T1 * ptr, T2 const & value) {
@@ -82,11 +87,22 @@ void destroy(FwdIter first, FwdIter last) noexcept
     }
 }
 
+//-------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T>
+stack<T>::stack(size_t s) : allocator<T>(s) {}
+
 template<typename T>
 stack<T>::~stack()
 {
 	destroy(allocator<T>::ptr_, allocator<T>::ptr_ + allocator<T>::count_);
 }
+
+template <typename T>
+stack<T>::stack(const stack& otherStack) : allocator<T>(otherStack.size_) {
+	for (size_t t = 0; t < otherStack.count_; ++t) construct(allocator<T>::ptr_ + t, otherStack.ptr_[t]);
+	allocator<T>::count_ = otherStack.count_;
+};
 
 template<typename T>
 stack<T>& stack<T>::operator=(stack & newst) {
@@ -114,6 +130,7 @@ void stack<T>::push(const T &value)
 
 
 }
+
 template<typename T>
 const T& stack<T>::top()
 {
@@ -131,11 +148,13 @@ void stack<T>::pop()
 	}
 	else throw ("Stack is empty");
 }
+
 template<typename T>
 size_t stack<T>::count() const
 {
 	return allocator<T>::count_;
 }
+
 template<typename T>
 bool stack<T>::empty()
 {
