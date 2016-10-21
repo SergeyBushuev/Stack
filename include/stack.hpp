@@ -156,7 +156,7 @@ size_t stack<T>::count() const
 }
 
 template<typename T>
-bool stack<T>::empty()
+bool stack<T>::empty() const
 {
 	return(allocator<T>::count_ == 0);
 }
