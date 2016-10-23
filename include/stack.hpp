@@ -54,19 +54,6 @@ public:
 
 //-------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>                  			//COPY
-T* newcopy(T const *ptr, size_t count, size_t _size)  /*strong*/
-{
-	T* nstack = new T[_size];
-	try {
-		std::copy(ptr, ptr + count, nstack);
-	}
-	catch (...) {
-		delete[] nstack;
-		throw;
-	}
-	return nstack;
-}
 
 template <typename T1, typename T2>
 void construct(T1 * ptr, T2 const & value) {
