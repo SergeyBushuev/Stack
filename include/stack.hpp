@@ -87,8 +87,12 @@ stack<T>::~stack()
 
 template <typename T>
 stack<T>::stack(const stack& otherStack) : allocator<T>(otherStack.size_) {
-	for (size_t t = 0; t < otherStack.count_; ++t) construct(allocator<T>::ptr_ + t, otherStack.ptr_[t]);
-	allocator<T>::count_ = otherStack.count_;
+	if (otherStack.count_ != 0) {
+		stack<T> array(otherStack.size_);
+		for (size_t t = 0; t < otherStack.count_; ++t) construct(array.ptr_ + t, otherStack.ptr_[t]);
+		std::swap(array.ptr_, this->ptr_);
+	}
+	this->count_ = otherStack.count_;
 };
 
 template<typename T>
@@ -102,19 +106,18 @@ stack<T>& stack<T>::operator=(stack & newst) {
 template<typename T>
 void stack<T>::push(const T &value)
 {
-	if (allocator<T>::count_ >= allocator<T>::size_) {
-		size_t size = allocator<T>::size_ * 2 + (allocator<T>::size_ == 0);
-		T * nstack = static_cast<T *>(operator new (sizeof(T)*allocator<T>::size_));
-		for (size_t t = 0; t < allocator<T>::count_; ++t) {
-			construct(nstack + t, allocator<T>::ptr_[t]);
+	if (this->size_ == this->count_) {
+		if (this->size_ == 0) { this->size_ = 1; }
+		size_t size = this->size_ * 2;
+		stack<T> array(size);
+		for (size_t t = 0; t < this->count_; ++t) {
+			construct(array.ptr_ + t, this->ptr_[t]);
 		}
-		operator delete(allocator<T>::ptr_);
-		allocator<T>::ptr_ = nstack;
-		allocator<T>::size_ = size;
+		std::swap(array.ptr_, this->ptr_);
+		this->size_ = size;
 	}
-	construct(allocator<T>::ptr_ + allocator<T>::count_, value);
-	++allocator<T>::count_;
-
+	construct(this->ptr_ + this->count_, value);
+        ++this->count_;
 
 }
 
