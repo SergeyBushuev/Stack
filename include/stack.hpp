@@ -89,7 +89,10 @@ template <typename T>
 stack<T>::stack(const stack& otherStack) : allocator<T>(otherStack.size_) {
 	if (otherStack.count_ != 0) {
 		stack<T> array(otherStack.size_);
-		for (size_t t = 0; t < otherStack.count_; ++t) construct(array.ptr_ + t, otherStack.ptr_[t]);
+		for (size_t t = 0; t < otherStack.count_; ++t) {
+                           construct(array.ptr_ + t, otherStack.ptr_[t]);
+                           array.count++;
+                                                               }
 		std::swap(array.ptr_, this->ptr_);
 	}
 	this->count_ = otherStack.count_;
