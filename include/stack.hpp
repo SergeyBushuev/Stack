@@ -1,4 +1,6 @@
+#include <cstring>
 #include <iostream>
+#include <memory>
 #pragma once
 
 template<typename T>
