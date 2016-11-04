@@ -3,155 +3,256 @@
 #include <memory>
 #pragma once
 
-template<typename T>
-class allocator {
-protected:
-	explicit allocator(size_t size = 0);							/*noexcept*/
-	~allocator();													/*noexcept*/
-	auto swap(allocator & other) -> void;							/*noexcept*/
-  
-	allocator(allocator const &) = delete;
-	auto operator=(allocator const &)->allocator & = delete;
+class bitset
+{
+public:
+	explicit bitset(size_t size = 0);
+	bitset(bitset const & other) = delete;
+	auto operator =(bitset const & other) -> bitset & = delete;
+	bitset(bitset && other) = delete;
+	auto operator =(bitset && other) -> bitset & = delete;;
+	~bitset();
+	auto test(size_t index) const throw(std::out_of_range) -> bool;
+	auto set(size_t index) throw(std::out_of_range) -> void;
+	auto reset(size_t index) throw(std::out_of_range) -> void;
+	auto size() const noexcept -> size_t;
+	auto swap(bitset & other)  noexcept -> void;
+private:
+	size_t size_;
+	bool* bit_;
+};
+bitset::bitset(size_t s) : size_(s), 
+bit_(s != 0 ? new bool[s] : nullptr) {
+	for (size_t t = 0; t < s; ++t) {
+		bit_[t] = 0;
+	}
+}
 
+bitset::~bitset() { delete[] bit_; }
+
+auto bitset::test(size_t index) const throw(std::out_of_range) -> bool {
+	if (index >= size_) std::out_of_range("In test");
+	else {
+		return bit_[index];
+	}
+}
+
+auto bitset::set(size_t index) throw(std::out_of_range) -> void {
+	if (index >= size_) std::out_of_range("In set");
+	else {
+		bit_[index] = true;
+	}
+}
+
+auto bitset::reset(size_t index) throw(std::out_of_range) -> void {
+	if (index >= size_) std::out_of_range("In reset");
+	else {
+		bit_[index] = false;
+	}
+}
+
+auto bitset::size() const noexcept -> size_t {return size_; }
+
+auto bitset::swap(bitset& other) noexcept -> void {
+	std::swap(size_, other.size_);
+	std::swap(bit_, other.bit_);
+}
+
+template <typename T>
+class allocator
+{
+public:
+	explicit allocator(size_t size = 0);
+	allocator(allocator const & other);
+	~allocator();
+	auto operator =(allocator const &) -> allocator & = delete;
+	auto swap(allocator & other) -> void;
+	auto resize() -> void;
+	auto construct(T * ptr, T const & value) throw(std::out_of_range) -> void;
+	auto destroy(T * ptr) throw(std::out_of_range) -> void;
+	auto destroy(T * first, T * last) -> void;
+	auto get() noexcept -> T *;
+	auto get() const noexcept -> T const *;
+	auto count() const noexcept -> size_t;
+	auto size() const noexcept -> size_t;
+	auto full() const noexcept -> bool;
+	auto empty() const noexcept -> bool;
+	auto test(size_t index) const -> bool;
+
+private:
 	T * ptr_;
 	size_t size_;
 	size_t count_;
+	bitset bs_;
 };
 
 //-------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T> 
-allocator<T>::allocator(size_t size) :
-	ptr_(static_cast<T *>(size == 0 ? nullptr : operator new(size * sizeof(T)))){
+template <typename T>
+allocator<T>::allocator(size_t s) : ptr_(static_cast<T *>(s != 0 ? operator new(s * sizeof(T)) : nullptr)),
+size_(s), count_(0), bs_(s) {}
+
+template <typename T>
+allocator<T>::allocator(allocator const & other) : allocator(other.size()) {
+	for (size_t t = 0; t < other.size(); ++t) {
+		if (other.test(t)) {
+			this->construct(ptr_ + t, other.get()[t]);
+		}
+	}
 }
 
-template<typename T> 
-allocator<T>::~allocator() {
+template<typename T>
+allocator<T>::~allocator() { 
+	if (count_ > 0) {
+		this->destroy(ptr_, ptr_ + size_);
+	}
 	operator delete(ptr_);
 }
+	
 
-template<typename T> 
-auto allocator<T>::swap(allocator & other) -> void {
-	std::swap(ptr_, other.ptr_);
-	std::swap(count_, other.count_);
-	std::swap(size_, other.size_);
+template <typename T>
+auto allocator<T>::resize() -> void {
+	size_t size = size_ * 2 + (size_ == 0);
+	allocator<T> other(size);
+	for (size_t t = 0; t < size_; ++t) {
+		if (this->test(t)) {
+			other.construct(other.get() + t, ptr_[t]);
+		}
+	}
+	other.swap(*this);
+}
+
+template<typename T>
+auto allocator<T>::destroy(T * ptr) throw(std::out_of_range) -> void {
+	if (ptr >= ptr_ + size_ || ptr < ptr_) std::out_of_range("In destroy(T * ptr)");
+	size_t t = ptr - ptr_;
+	if (bs_.test(t)) {
+		ptr->~T();
+		bs_.reset(t);
+		--count_;
+	}
+}
+
+template <typename T>
+auto allocator<T>::destroy(T * first, T * last)  -> void {
+	for (; first != last; ++first) {
+		this->destroy(first);
+	}
+}
+
+template <typename T>
+auto allocator<T>::construct(T * ptr, T const & value) throw(std::out_of_range) -> void {
+	if (ptr >= ptr_ + size_ || ptr < ptr_) std::out_of_range("In construct");
+	size_t t = ptr - ptr_;
+	if (bs_.test(t)) {
+		this->destroy(ptr);
+	}
+	new(ptr) T(value);
+	bs_.set(t);
+	++count_;
+}
+
+template<typename T>
+auto allocator<T>::get() noexcept-> T * {
+	return ptr_;
+}
+
+template<typename T>
+auto allocator<T>::get() const noexcept-> T const * {
+	return ptr_;
+}
+
+template<typename T>
+auto allocator<T>::count() const noexcept -> size_t { 
+	return count_; 
+}
+
+template<typename T>
+auto allocator<T>::size() const noexcept -> size_t {
+	return size_; 
+}
+
+template<typename T>
+auto allocator<T>::full() const noexcept -> bool { 
+	return (count_ == size_); 
+}
+
+template<typename T>
+auto allocator<T>::empty() const noexcept -> bool {
+	return (count_ == 0); 
+}
+
+template<typename T>
+auto allocator<T>::test(size_t index) const -> bool { return bs_.test(index); }
+
+template <typename T>
+auto allocator<T>::swap(allocator& s) -> void {
+	std::swap(s.ptr_, ptr_);
+	std::swap(s.count_, count_);
+	std::swap(s.size_, size_);
+	bs_.swap(s.bs_);
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-class stack : private allocator<T>
+class stack
 {
 public:
-	stack(size_t size = 0);										/*noexcept*/
-	stack(const stack &); 							/*strong*/
-	~stack(); 										/*noexcept*/
-	size_t count() const; 							/*noexcept*/
-	void push(T const &); 							/*strong*/
-	void pop(); 									/*strong*/
-	const T& top(); 								/*strong*/
-	stack & operator=(stack & newst);				/*strong*/
-	bool empty() const; 									/*noexcept*/
+	explicit stack(size_t size = 0); /*noexcept*/
+	~stack(); /*noexcept*/
+	auto count() const noexcept -> size_t; /*noexcept*/
+	auto empty() const noexcept -> bool; /*noexcept*/
+	auto push(T const & el) -> void; /*strong*/
+	auto operator = (stack<T> & st) -> stack<T> &; /*strong*/
+	auto pop() throw(std::logic_error) -> void; /*strong*/
+	auto top() const throw(std::logic_error) -> T const &; /*strong*/
+private:
+	allocator<T> al_;
 };
 
 //-------------------------------------------------------------------------------------------------------------------------------
 
-
-template <typename T1, typename T2>
-void construct(T1 * ptr, T2 const & value) {
-    new(ptr) T1 (value);
-}
-
-template <typename T>
-void destroy(T * ptr) noexcept
-{
-    ptr->~T();
-}
-
-template <typename FwdIter>
-void destroy(FwdIter first, FwdIter last) noexcept
-{
-    for (; first != last; ++first) {
-        destroy(&*first);
-    }
-}
-
-//-------------------------------------------------------------------------------------------------------------------------------
+template<typename T>
+stack<T>::stack(size_t s) : al_(s) {}
 
 template<typename T>
-stack<T>::stack(size_t s) : allocator<T>(s) {}
-
-template<typename T>
-stack<T>::~stack()
-{
-	destroy(allocator<T>::ptr_, allocator<T>::ptr_ + allocator<T>::count_);
-}
+stack<T>::~stack() { al_.destroy(al_.get(), al_.get() + al_.count()); }
 
 template <typename T>
-stack<T>::stack(const stack& otherStack) : allocator<T>(otherStack.size_) {
-	if (otherStack.count_ != 0) {
-		stack<T> array(otherStack.size_);
-		for (size_t t = 0; t < otherStack.count_; ++t) {
-                           construct(array.ptr_ + t, otherStack.ptr_[t]);
-                           array.count++;
-                                                               }
-		std::swap(array.ptr_, this->ptr_);
+auto stack<T>::empty() const noexcept -> bool { return (al_.count() == 0); }
+
+template <typename T>
+auto stack<T>::count() const noexcept -> size_t { return al_.count(); }
+
+template <typename T>
+auto stack<T>::push(T const & el) ->void {
+	if (al_.full()) {
+		al_.resize();
 	}
-	this->count_ = otherStack.count_;
-};
+	al_.construct(al_.get() + al_.count(), el);
+}
 
-template<typename T>
-stack<T>& stack<T>::operator=(stack & newst) {
-	if (this != &newst) {
-		(stack(newst)).swap(*this);
+template <typename T>
+auto stack<T>::operator = (stack<T> & st) -> stack<T> & {
+	if (this != &st) {
+		(allocator<T>(st.al_)).swap(al_);
 	}
 	return *this;
 }
 
-template<typename T>
-void stack<T>::push(const T &value)
-{
-	if (this->size_ == this->count_) {
-		if (this->size_ == 0) { this->size_ = 1; }
-		size_t size = this->size_ * 2;
-		stack<T> array(size);
-		for (size_t t = 0; t < this->count_; ++t) {
-			construct(array.ptr_ + t, this->ptr_[t]);
-		}
-		std::swap(array.ptr_, this->ptr_);
-		this->size_ = size;
+template <typename T>
+auto stack<T>::pop() throw(std::logic_error) -> void {
+	if (al_.empty()) std::logic_error("In pop");
+	else {
+		al_.destroy(al_.get() + al_.count() - 1);
 	}
-	construct(this->ptr_ + this->count_, value);
-        ++this->count_;
-
 }
 
-template<typename T>
-const T& stack<T>::top()
-{
-	if (allocator<T>::count_ > 0) {
-		return allocator<T>::ptr_[allocator<T>::count_ - 1];
+template <typename T>
+auto stack<T>::top() const throw(std::logic_error) -> T const & {
+	if (al_.empty()) std::logic_error("In top");
+	else {
+		return al_.get()[al_.count() - 1];
 	}
-	else throw("Stack is empty");
-}
-
-template<typename T>
-void stack<T>::pop()
-{
-	if (allocator<T>::count_> 0) {
-		--allocator<T>::count_;
-	}
-	else throw ("Stack is empty");
-}
-
-template<typename T>
-size_t stack<T>::count() const
-{
-	return allocator<T>::count_;
-}
-
-template<typename T>
-bool stack<T>::empty() const
-{
-	return(allocator<T>::count_ == 0);
 }
