@@ -223,22 +223,6 @@ private:
 	auto throw_is_empty()/*strong*/ const -> void;
 };
 
-//template <typename T>
-//auto new_copy(const T * source,  size_t new_size,size_t current_size) -> T*/*strong*/
-//{
-//        T * new_array = new T[new_size];
-//	try
-//	{
-//		std::copy(source, source + current_size, new_array);
-//	}
-//	catch(...)
-//	{
-//		delete []new_array;
-//		throw;
-//	}
-//	return new_array;
-//};
-
 
 template <typename T>/*noexcept*/
 stack<T>::stack(size_t size) : allocator_(size)
