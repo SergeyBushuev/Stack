@@ -158,7 +158,7 @@ auto allocator<T>::get() const -> T const *
 template<typename T>
 allocator<T>::allocator(allocator const& other) :allocator<T>(other.size_)
 {
-	for (size_t i = 0; i < other.count(); ++i) 
+	for (size_t i = 0; i < other.size(); ++i) 
 		construct(ptr_ + i, other.ptr_[i]);
 }
 
