@@ -268,7 +268,7 @@ template <typename T>
 auto stack<T>::top()-> T&/*strong*/
 {
 	if (this->count() > 0) 
-		return(*(allocator_.get() + this->count() - 1));
+		return(allocator_.get() [count() - 1]);
 	else this->throw_is_empty();
 }
 
@@ -276,7 +276,7 @@ template<typename T>
 auto stack<T>::top()const->T const & 
 {
 	if (this->count() > 0) 
-		return(*(allocator_.get() + this->count() - 1));
+		return(allocator_.get()[count() - 1]);
 	else this->throw_is_empty();
 }
 
