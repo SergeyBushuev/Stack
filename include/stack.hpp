@@ -154,10 +154,13 @@ auto allocator<T>::get() const -> T const *
 }
 
 template<typename T>
-allocator<T>::allocator(allocator const& other) :allocator<T>(other.size_)
-{
-	for (size_t i = 0; i < other.size(); ++i) 
+allocator<T>::allocator(allocator const& other) :
+ptr_(static_cast<T *>(other.size_ == 0 ? nullptr : operator new(other.size_ * sizeof(T)))), 
+	size_(other.size_), 
+	map_(std::make_unique<bitset>(other.size_)) {
+	for (size_t i = 0; i < size_; ++i) {
 		construct(ptr_ + i, other.ptr_[i]);
+	}
 }
 
 template <typename T>
