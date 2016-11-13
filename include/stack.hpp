@@ -127,7 +127,7 @@ auto allocator<T>::construct(T *ptr,T const & val) ->void
 template <typename T>
 auto allocator<T>::destroy(T *ptr)-> void
 {
-	if (ptr_ == 1){
+	if (ptr_){
 	ptr->~T();
 	map_->reset(ptr - ptr_);
 	}
