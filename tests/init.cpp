@@ -4,8 +4,13 @@
 using namespace std;
 
 SCENARIO("Stack: init", "[init]") {
+	bool mark=false;
 	stack<size_t> a;
-	REQUIRE(sizeof(a) != 0);
+	if(sizeof(a) != 0)
+	{
+		mark=true;
+	}
+	REQUIRE(mark);
 } 
 SCENARIO("Stack count", "[count]"){
 	bool mark=false;
