@@ -69,8 +69,6 @@ SCENARIO("Assign", "[assign]"){
 	st.push(10);
 	stack<int> st_;
 	st_=st;
-	std::cout << "st_.count_=" << st_.count() << std::endl;
-	std::cout << "st_.top=" << st_.top() << std::endl;
 	if ((st_.top()==st.top())
 	{
 		mark=true;
@@ -83,8 +81,6 @@ SCENARIO("Copy","[copy]"){
 	stack<int> st;
 	st.push(10);
 	stack<int> st_=st;
-	std::cout << "st_.count_=" << st_.count() << std::endl;
-	std::cout << "st_.top=" << st_.top() << std::endl;
 	if ((st_.top()==st.top())
 	{
 		mark=true;
