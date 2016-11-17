@@ -69,7 +69,7 @@ SCENARIO("Assign", "[assign]"){
 	st.push(10);
 	stack<int> st_;
 	st_=st;
-	if ((st_.top()==st.top())
+	if (st_.top()==st.top())
 	{
 		mark=true;
 	}
@@ -81,7 +81,7 @@ SCENARIO("Copy","[copy]"){
 	stack<int> st;
 	st.push(10);
 	stack<int> st_=st;
-	if ((st_.top()==st.top())
+	if (st_.top()==st.top())
 	{
 		mark=true;
 	}
