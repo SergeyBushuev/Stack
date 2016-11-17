@@ -127,8 +127,8 @@ auto allocator<T>::construct(T *ptr,T const & val) ->void
 template <typename T>
 auto allocator<T>::destroy(T *ptr)-> void
 {
-	if (ptr < ptr_ || ptr >= ptr_ + _size) throw std::out_of_range("error");
-	if (!_map->test(ptr - ptr_)){
+	if (ptr < ptr_ || ptr >= ptr_ + size_) throw std::out_of_range("error");
+	if (!map_->test(ptr - ptr_)){
 	ptr->~T();
 	map_->reset(ptr - ptr_);
 	}
