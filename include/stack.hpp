@@ -54,7 +54,7 @@ auto bitset::reset(size_t index)->void
 auto bitset::test(size_t index)->bool 
 { 
 	if (index < size_) 
-		return !ptr_[index]; 
+		return ptr_[index]; 
 	else throw("out os bitset"); 
 }
 
