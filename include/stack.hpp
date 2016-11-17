@@ -163,7 +163,7 @@ ptr_(static_cast<T *>(other.size_ == 0 ? nullptr : operator new(other.size_ * si
 	size_(other.size_), 
 	map_(std::make_unique<bitset>(other.size_)) {
 	for (size_t i = 0; i < other.size_; ++i) {
-		if (other.map_->test(i)){
+		if (other.map_->test(other.ptr_+i)){
 		this->construct(ptr_ + i, other.ptr_[i]);
 		}
 	}
