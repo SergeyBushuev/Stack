@@ -1,103 +1,59 @@
-#include <stack.hpp>
+#include <stack.cpp>
 #include <catch.hpp>
 #include <iostream>
 using namespace std;
 
-SCENARIO("Stack: init", "[init]") {
-	bool mark=false;
-	stack<size_t> a;
-	if(sizeof(a) != 0)
-	{
-		mark=true;
-	}
-	REQUIRE(mark);
-} 
-SCENARIO("Stack count", "[count]"){
-	bool mark=false;
-	stack<int> st;
-	if ((st.count()==0))
-	{
-		mark=true;
-	}
-	st.push(1);
-	if ((st.count()==1))
-	{
-		mark=true;
-	}
-	REQUIRE(mark);
+SCENARIO("count", "[count]"){
+  stack<int> s;
+  s.push(1);
+  REQUIRE(s.count()==1);
 }
 
-SCENARIO("Stack push", "[push]"){
-	bool mark=false;
-	stack<int> st;
-	st.push(1);
-	if ((st.count()==1)&&(st.top()==1))
-	{
-		mark=true;
-	}
-	REQUIRE(mark);
+SCENARIO("push", "[push]"){
+  stack<int> s;
+  s.push(1);
+  REQUIRE(s.count()==1);
 }
 
-SCENARIO("Stack pop", "[pop]"){
-	bool mark=false;
-	stack<int> st;
-	st.push(123);
-	st.pop();
-	if (st.count()==0)
-	{
-		mark=true;
-	}
-	REQUIRE(mark);
+SCENARIO("pop", "[pop]"){
+  stack<int> s;
+  s.push(1);
+  REQUIRE(*(s.pop())==1);	
+  REQUIRE(s.count()==0);
 }
 
-SCENARIO("Stack top", "[top]"){
-	bool mark=false;
-	stack<int> st;
-	st.push(11);
-	st.push(22);
-	int v=st.top();
-	if (v==22)
-	{
-		mark=true;
-	}
-	REQUIRE(mark);
+SCENARIO("prisv", "[prisv]"){
+  stack<int> s;
+  s.push(1);
+  stack<int> s2;
+  s2=s;
+  REQUIRE(s.count()==1);
 }
 
-SCENARIO("Assign", "[assign]"){
-	bool mark=false;
-	stack<int> st;
-	st.push(10);
-	stack<int> st_;
-	st_=st;
-	if (st.top()==st_.top())
-	{
-		mark=true;
-	}
-	REQUIRE(mark);
+SCENARIO("empty", "[empty]"){
+  stack<int> s1, s2;
+  s1.push(1);
+  REQUIRE(!s1.empty());
+  REQUIRE(s2.empty());
 }
 
-SCENARIO("Copy","[copy]"){
-	bool mark=false;
-	stack<int> st;
-	st.push(10);
-	stack<int> st_=st;
-	if (st.top()==st_.top())
-	{
-		mark=true;
-	}
-	REQUIRE(mark);
-}
-
-SCENARIO("Empty","[empty]"){
-	bool mark=false;
-	bool mark_empty,mark_full;
-	stack<int> st;
-	mark_empty=st.empty();
-	st.push(10);
-	mark_full=st.empty();
-	if ((mark_empty==true) && (mark_full==false))
-	{
-		mark=true;
-	}
-	REQUIRE(mark);
+SCENARIO("threads", "[threads]"){
+  stack<int> s;
+  s.push(1);
+  s.push(2);
+  s.push(3);
+	std::thread t1([&s](){
+		for (int i = 0; i < 5; i++) {
+			s.push(i + 4);
+		}
+	});
+	std::thread t2([&s](){
+		for (int i = 0; i < 5; i++)
+		{
+			s.pop();
+		}
+	});
+	t1.join();
+	t2.join();
+  REQUIRE(s.count()==3);
 }
