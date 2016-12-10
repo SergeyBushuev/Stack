@@ -1,12 +1,14 @@
-#include <cstring>
 #include <iostream>
 #include <memory>
+#include <thread>
+#include <mutex>
+
 
 class bitset
 {
 public:
 	explicit
-	bitset(size_t size) /*strong*/;
+	bitset(size_t size);//strong
 
 	bitset(bitset const & other) = delete;
 	auto operator =(bitset const & other)->bitset & = delete;
@@ -20,55 +22,52 @@ public:
 
 	auto size() /*noexcept*/ -> size_t;
 	auto counter() /*noexcept*/ -> size_t;
-
 private:
 	std::unique_ptr<bool[]>  ptr_;
 	size_t size_;
 	size_t counter_;
 };
 
-bitset::bitset(size_t size) : ptr_(std::make_unique<bool[]>(size)), size_(size), counter_(0)
-{}
+bitset::bitset(size_t size) : ptr_(std::make_unique<bool[]>(size)), size_(size), counter_(0){}
 
 auto bitset::set(size_t index)->void 
 { 
-	if (index < size_)
+	if (index >= 0 && index < size_) 
 	{ 
-		ptr_[index] = true; 
-		++counter_; 
-	} 
-    else 
-    throw("out of bitset"); 
+	ptr_[index] = true; 
+	++counter_; 				 
+        }
+	else throw("Wrong_index");
 }
 
 auto bitset::reset(size_t index)->void 
 { 
-	if (index < size_) 
+	if (index >= 0 && index < size_) 
 	{ 
-		ptr_[index] = false; 
-		--counter_; 
-	} 
-	else 
-		throw("out of bitset"); }
+	ptr_[index] = false; 
+	--counter_; 	 				 
+        } 
+	else throw("Wrong_index"); 
+}
 
 auto bitset::test(size_t index)->bool 
 { 
-	if (index < size_) 
-		return !ptr_[index]; 
-	else throw("out os bitset"); 
+	if (index >= 0 && index < size_) 
+	{
+	return !ptr_[index]; 
+	}
+	else throw("Wrong_index"); 
 }
 
 auto bitset::size()->size_t
 { 
-	return size_; 
+return size_; 
 }
 
 auto bitset::counter()->size_t
 { 
-	return counter_; 
+return counter_; 
 }
-
-
 
 template <typename T>
 class allocator
@@ -78,12 +77,13 @@ public:
 	allocator(std::size_t size = 0) /*strong*/;
 	allocator(allocator const & other) /*strong*/;
 	auto operator =(allocator const & other)->allocator & = delete;
+	
 	~allocator();
 
 	auto resize() /*strong*/ -> void;
 
 	auto construct(T * ptr, T const & value) /*strong*/ -> void;
-	auto destroy(T * ptr) /*strong*/ -> void;
+	auto destroy(T * ptr) /*noexcept*/ -> void;
 
 	auto get() /*noexcept*/ -> T *;
 	auto get() const /*noexcept*/ -> T const *;
@@ -93,57 +93,68 @@ public:
 	auto empty() const /*noexcept*/ -> bool;
 	auto swap(allocator & other) /*noexcept*/ -> void;
 private:
-	auto destroy(T * first, T * last) /*strong*/ -> void;
-	
+	auto destroy(T * first, T * last) /*noexcept*/ -> void;
+        size_t count_;
 	T * ptr_;
 	size_t size_;
 	std::unique_ptr<bitset> map_;
 };
 
-template <typename T>
-allocator<T>::allocator(size_t size) : ptr_((T*)operator new(size)), size_(size), map_(std::make_unique<bitset>(size))
-{}
+template<typename T>
+allocator<T>::allocator(size_t size) : ptr_((T*)operator new(size*sizeof(T))), size_(size), map_(std::make_unique<bitset>(size)), count_(0) {}
 
-template<typename T> /*noexcept*/
-allocator<T>::~allocator() {
-	if (this->count() > 0)
+template<typename T>
+allocator<T>::allocator(allocator const& other) : allocator<T>(other.size_) 
+{
+	for (size_t i = 0; i < other.count_; i++) 
+		if(map_->test(i)) 
+			construct(ptr_ + i, other.ptr_[i]);
+}
+
+template<typename T>
+allocator<T>::~allocator()
+{
+	if (this->count() > 0) 
 	{
-	    allocator<T>::destroy(ptr_, ptr_ + size_);
-	    operator delete(ptr_);
+		destroy(ptr_, ptr_ + size_);
 	}
-	
-}
-
-template <typename T>
-auto allocator<T>::construct(T *ptr,T const & val) ->void
-{
-	if (ptr >= ptr_ && ptr < ptr_ + size_ && map_->test(ptr - ptr_)){
-		new(ptr)T(val);
-		map_->set(ptr - ptr_);
-	}
-	else { throw("error"); }
-}
-
-template <typename T>
-auto allocator<T>::destroy(T *ptr)-> void
-{
-	if (ptr < ptr_ || ptr >= ptr_ + size_) throw std::out_of_range("error");
-	if (!map_->test(ptr - ptr_)){
-	ptr->~T();
-	map_->reset(ptr - ptr_);
-	}
-		
+	operator delete(ptr_);
 }
 
 template<typename T>
 auto allocator<T>::resize()->void
 {
-	allocator<T> all(size_ * 2 + (size_ == 0));
+	allocator<T> al(size_ * 2 + (size_ == 0));
 	for (size_t i = 0; i < size_; ++i) 
-		if (!map_->test(i)){
-		all.construct(all.get() + i, ptr_[i]);
-		}
-	this->swap(all);
+	      if (al.map_->test(i)) 
+	            al.construct(al.get() + i, ptr_[i]);
+	al.swap(*this);
+}
+
+template<typename T>
+auto allocator<T>::construct(T * ptr, T const & value)->void
+{
+	if (ptr >= ptr_ && ptr < ptr_ + size_)
+	{
+		new(ptr)T(value);
+		map_->set(ptr - ptr_);
+		++count_;
+	}
+	else 
+	{ 
+	throw("error"); 
+	}
+}
+
+template<typename T>
+auto allocator<T>::destroy(T* ptr)->void
+{
+	if (!map_->test(ptr - ptr_) && ptr >= ptr_ && ptr <= ptr_ + this->count())
+	{
+		ptr->~T();
+		map_->reset(ptr - ptr_);
+		--count_;
+	}
 }
 
 template<typename T>
@@ -159,38 +170,14 @@ auto allocator<T>::get() const -> T const *
 }
 
 template<typename T>
-allocator<T>::allocator(allocator const& other) :
-ptr_(static_cast<T *>(other.size_ == 0 ? nullptr : operator new(other.size_ * sizeof(T)))), 
-	size_(other.size_), 
-	map_(std::make_unique<bitset>(other.size_)) {
-	for (size_t i = 0; i < other.size_; ++i) {
-		if (!other.map_->test(i)){
-		this->construct(ptr_ + i, other.ptr_[i]);
-		}
-	}
-}
-
-template <typename T>
-auto allocator<T>::destroy(T *first,T *last)-> void
-{
-	if(first>last)
-	throw std::logic_error("errror");
-	for (; first != last; ++first)
-	{
-		destroy(first);
-	}
-	
-}
-
-template<typename T>
 auto allocator<T>::count() const -> size_t
 { 
-	return map_->counter(); 
+	return count_; 
 }
 
 template<typename T>
 auto allocator<T>::full() const -> bool 
-{
+{ 
 	return (map_->counter() == size_); 
 }
 
@@ -200,102 +187,111 @@ auto allocator<T>::empty() const -> bool
 	return (map_->counter() == 0); 
 }
 
-	
-template<typename T> /*noexcept*/
-auto allocator<T>::swap(allocator & other) -> void {
+template<typename T>
+auto allocator<T>::destroy(T * first, T * last)->void
+{
+	if (first >= ptr_ && last <= ptr_ + this->count())
+		for (; first != last; ++first) 
+		{
+		destroy(&*first);
+	        }
+}
+template<typename T>
+auto allocator<T>::swap(allocator & other)->void
+{
 	std::swap(ptr_, other.ptr_);
 	std::swap(size_, other.size_);
 	std::swap(map_, other.map_);
+	std::swap(count_, other.count_);
 }
 
+
+
 template <typename T>
-class stack
+class stack 
 {
 public:
-	explicit
-	stack(size_t size = 0);
+	explicit stack(size_t size = 0);
+	stack(stack const & other); /*strong*/
 	auto operator =(stack const & other) /*strong*/ -> stack &;
-	
 
 	auto empty() const /*noexcept*/ -> bool;
 	auto count() const /*noexcept*/ -> size_t;
 
 	auto push(T const & value) /*strong*/ -> void;
-	auto pop() /*strong*/ -> void;
-	auto top() /*strong*/ -> T &;
-	auto top() const /*strong*/ -> T const &;
+	auto pop() /*strong*/ -> std::shared_ptr<T>;
 
 private:
 	allocator<T> allocator_;
-
 	auto throw_is_empty()/*strong*/ const -> void;
+	mutable std::mutex m;
 };
 
+template <typename T>
+stack<T>::stack(size_t size) : allocator_(size), m() {};
 
-template <typename T>/*noexcept*/
-stack<T>::stack(size_t size) : allocator_(size)
-{};
+template <typename T>
+stack<T>::stack(stack const & other) : allocator_(0), m() 
+{
+	std::lock(m, other.m);
+	std::lock_guard<std::mutex> lk1(m, std::adopt_lock);
+	std::lock_guard<std::mutex> lk2(other.m, std::adopt_lock);
+	allocator_.swap(allocator<T>(other.allocator_));
+}
 
+template <typename T>
+auto stack<T>::count() const ->size_t 
+{
+	std::lock_guard<std::mutex> lk(m);
+	return allocator_.count();
+}
+
+template <typename T>
+auto stack<T>::push(T const &val)->void 
+{
+	std::lock_guard<std::mutex> lk(m);
+	if (allocator_.full()) 
+	{
+		allocator_.resize();
+	}
+	allocator_.construct(allocator_.get() + allocator_.count(), val);
+}
+
+template <typename T>
+auto stack<T>::pop()->std::shared_ptr<T> 
+{
+	std::lock_guard<std::mutex> lk(m);
+	if (allocator_.count() == 0) throw_is_empty();
+	std::shared_ptr<T> top_(std::make_shared<T>(allocator_.get()[allocator_.count() - 1]));
+	allocator_.destroy(allocator_.get() + allocator_.count() - 1);
+	return top_;
+}
 
 
 template <typename T>
-auto stack<T>::operator=(const stack & st)-> stack &/*strong*/
+auto stack<T>::operator=(const stack &other)->stack &  
 {
-	if (this != &st)
+	if (this != &other) 
 	{
-		(allocator<T>(st.allocator_)).swap(this->allocator_);
+		std::lock(m, other.m);
+		std::lock_guard<std::mutex> lk1(m, std::adopt_lock);
+		std::lock_guard<std::mutex> lk2(other.m, std::adopt_lock);
+		(allocator<T>(other.allocator_)).swap(allocator_);
 	}
 	return *this;
-};
-
-template <typename T>
-size_t  stack<T>::count() const/*noexcept*/
-{
-	return allocator_.count();
-};
-
-template <typename T>
-void stack<T>::push(T const &value)/*strong*/
-{
-	if (allocator_.full())
-		allocator_.resize();
-	allocator_.construct(allocator_.get() + this->count(), value);
-};
-
-template <typename T>
-void stack<T>::pop()/*strong*/
-{
-	if (allocator_.count() == 0)
-	{
-		this->throw_is_empty();
-	}
-	allocator_.destroy(allocator_.get() + (this->count()-1));
-};
-
-template <typename T>
-auto stack<T>::top()-> T&/*strong*/
-{
-	if (this->count() > 0) 
-		return(allocator_.get() [count() - 1]);
-	else this->throw_is_empty();
 }
 
 template<typename T>
-auto stack<T>::top()const->T const & 
+auto stack<T>::empty() const->bool 
 {
-	if (this->count() > 0) 
-		return(allocator_.get()[count() - 1]);
-	else this->throw_is_empty();
+	std::lock_guard<std::mutex> lk(m);
+	return (allocator_.count() == 0);
 }
 
-template <typename T>/*noexcept*/
-auto stack<T>::empty()const->bool 
-{
-	return(allocator_.empty() == 1);
-}
-
-template<typename T>
+template <typename T>
 auto stack<T>::throw_is_empty()const->void
 {
-	throw std::logic_error("ERROR"); 
+	std::lock_guard<std::mutex> lk(m);
+	throw("Empty");
 }
+
