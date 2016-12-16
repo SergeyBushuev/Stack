@@ -291,7 +291,6 @@ auto stack<T>::empty() const->bool
 template <typename T>
 auto stack<T>::throw_is_empty()const->void
 {
-	std::lock_guard<std::mutex> lk(m);
 	throw("Empty");
 }
 
